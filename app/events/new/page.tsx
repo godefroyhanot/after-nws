@@ -97,6 +97,14 @@ export default function NewEventPage() {
             >
               Créer l'événement
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mt-2"
+              onClick={() => window.location.href = '/events'}
+            >
+              Retour à la liste
+            </Button>
           </form>
         </CardContent>
       </Card>
