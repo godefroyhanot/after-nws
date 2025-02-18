@@ -1,5 +1,9 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import DeleteButton from "./DeleteButton";
+import EditButton from "./EditButton";
 
 type Event = {
   id: string;
@@ -12,9 +16,12 @@ type Event = {
 };
 
 async function getEvent(id: string): Promise<Event> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/events/${id}`, {
-    cache: 'no-store',
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/events/${id}`,
+    {
+      cache: "no-store",
+    }
+  );
 
   if (!res.ok) {
     notFound();
@@ -23,35 +30,54 @@ async function getEvent(id: string): Promise<Event> {
   return res.json();
 }
 
-export default async function EventPage({ params }: { params: { id: string } }) {
-  const event = await getEvent(params.id);
+async function deleteEvent(id: string) {
+  "use server";
 
+  try {
+    await prisma.event.delete({
+      where: { id },
+    });
+    revalidatePath("/events");
+    redirect("/events");
+  } catch (error) {
+    console.error("Erreur lors de la suppression:", error);
+    throw new Error("Impossible de supprimer l'événement");
+  }
+}
+
+export default async function EventPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const awaitParams = await params;
+  const event = await getEvent(awaitParams.id);
   return (
     <div className="max-w-4xl mx-auto p-8">
-      <Link 
+      <Link
         href="/events"
-        className="text-blue-600 hover:text-blue-800 mb-6 inline-block"
+        className="text-teal-600 hover:text-teal-800 mb-6 inline-block"
       >
         ← Retour aux événements
       </Link>
 
       <div className="bg-white rounded-lg shadow-md p-6">
         <h1 className="text-3xl font-bold mb-4">{event.title}</h1>
-        
+
         <div className="grid gap-4 text-gray-600 mb-6">
           <p>
-            <span className="font-semibold">Date :</span>{' '}
-            {new Date(event.date).toLocaleDateString('fr-FR', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
+            <span className="font-semibold">Date :</span>{" "}
+            {new Date(event.date).toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </p>
           <p>
-            <span className="font-semibold">Organisateur :</span>{' '}
-            {event.organizer?.name || 'Non spécifié'}
+            <span className="font-semibold">Organisateur :</span>{" "}
+            {event.organizer?.name || "Non spécifié"}
           </p>
         </div>
 
@@ -60,6 +86,16 @@ export default async function EventPage({ params }: { params: { id: string } }) 
           <p className="whitespace-pre-wrap">{event.description}</p>
         </div>
       </div>
+
+      <div className="flex">
+        <EditButton eventId={event.id} />
+        <DeleteButton
+          action={async () => {
+            "use server";
+            await deleteEvent(event.id);
+          }}
+        />
+      </div>
     </div>
   );
-} 
+}

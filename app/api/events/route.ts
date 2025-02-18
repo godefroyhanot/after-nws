@@ -39,7 +39,18 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const { title, description, date } = await request.json()
+        const formData = await request.formData();
+        const title = formData.get('title') as string;
+        const description = formData.get('description') as string;
+        const date = formData.get('date') as string;
+        const coverImage = formData.get('coverImage') as string;
+
+        if (!title || !description || !date) {
+            return NextResponse.json(
+                { error: "Le titre, la description et la date sont requis" },
+                { status: 400 }
+            )
+        }
 
         // Récupérer l'utilisateur par défaut
         const defaultOrganizer = await prisma.user.findUnique({
@@ -49,23 +60,43 @@ export async function POST(request: Request) {
         })
 
         if (!defaultOrganizer) {
-            throw new Error('Organisateur par défaut non trouvé')
+            return NextResponse.json(
+                { error: "Organisateur par défaut non trouvé" },
+                { status: 404 }
+            )
         }
 
-        const event = await prisma.event.create({
-            data: {
-                title,
-                description,
-                date: new Date(date),
-                organizerId: defaultOrganizer.id,
-            },
-        })
+        // Vérifier la taille de l'image
+        if (coverImage && coverImage.length > 5 * 1024 * 1024) { // 5MB max
+            return NextResponse.json(
+                { error: "L'image est trop volumineuse. Taille maximum : 5MB" },
+                { status: 400 }
+            )
+        }
 
-        return NextResponse.json(event, { status: 201 })
+        try {
+            const event = await prisma.event.create({
+                data: {
+                    title,
+                    description,
+                    date: new Date(date),
+                    coverImage: coverImage || null,
+                    organizerId: defaultOrganizer.id,
+                },
+            })
+
+            return NextResponse.json({ success: true, event }, { status: 201 })
+        } catch (error) {
+            console.error("Erreur Prisma:", error)
+            return NextResponse.json(
+                { error: "Erreur lors de la création dans la base de données" },
+                { status: 500 }
+            )
+        }
     } catch (error) {
         console.error("Erreur lors de la création de l'événement:", error)
         return NextResponse.json(
-            { error: "Erreur lors de la création de l'événement" },
+            { error: "Une erreur est survenue lors de la création de l'événement" },
             { status: 500 }
         )
     }
