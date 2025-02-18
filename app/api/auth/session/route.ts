@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma'
+import { prisma } from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
 import { cookies } from 'next/headers'
 
