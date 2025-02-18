@@ -36,4 +36,28 @@ export async function GET(
       { status: 500 }
     );
   }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await request.json();
+    const event = await prisma.event.update({
+      where: { id: params.id },
+      data: {
+        title: body.title,
+        description: body.description,
+        date: body.date,
+      },
+    });
+
+    return NextResponse.json(event);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Erreur lors de la mise à jour' },
+      { status: 500 }
+    );
+  }
 } 
