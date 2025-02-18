@@ -2,16 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useState } from 'react';
 
 type Event = {
   id: string;
   title: string;
   description: string;
   date: string;
+  coverImage?: string | null;
 };
 
 export default function EditForm({ event }: { event: Event }) {
   const router = useRouter();
+  const [imagePreview, setImagePreview] = useState<string | null>(event.coverImage);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,6 +29,7 @@ export default function EditForm({ event }: { event: Event }) {
         title: formData.get('title'),
         description: formData.get('description'),
         date: new Date(formData.get('date') as string).toISOString(),
+        coverImage: imagePreview,
       }),
     });
 
@@ -34,6 +38,17 @@ export default function EditForm({ event }: { event: Event }) {
       router.refresh();
     }
   }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -77,6 +92,29 @@ export default function EditForm({ event }: { event: Event }) {
           rows={4}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
+      </div>
+
+      <div>
+        <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+          Image de couverture
+        </label>
+        <input
+          type="file"
+          name="image"
+          id="image"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="mt-1 block w-full"
+        />
+        {imagePreview && (
+          <div className="mt-2">
+            <img
+              src={imagePreview}
+              alt="Aperçu"
+              className="max-w-xs h-auto rounded-lg"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex gap-4">

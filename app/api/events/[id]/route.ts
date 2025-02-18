@@ -50,6 +50,7 @@ export async function PUT(
         title: body.title,
         description: body.description,
         date: body.date,
+        coverImage: body.coverImage,
       },
     });
 
