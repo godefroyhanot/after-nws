@@ -22,8 +22,6 @@ async function getEvents() {
 export default async function Events() {
   const events = await getEvents();
 
-  console.log(events);
-
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
