@@ -1,5 +1,11 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
+import { PrismaClient } from '@prisma/client';
+import DeleteButton from './DeleteButton';
+import EditButton from './EditButton';
+
+const prisma = new PrismaClient();
 
 type Event = {
   id: string;
@@ -21,6 +27,21 @@ async function getEvent(id: string): Promise<Event> {
   }
 
   return res.json();
+}
+
+async function deleteEvent(id: string) {
+  "use server";
+  
+  try {
+    await prisma.event.delete({
+      where: { id },
+    });
+    revalidatePath('/events');
+    redirect('/events');
+  } catch (error) {
+    console.error('Erreur lors de la suppression:', error);
+    throw new Error('Impossible de supprimer l\'événement');
+  }
 }
 
 export default async function EventPage({ params }: { params: { id: string } }) {
@@ -59,6 +80,16 @@ export default async function EventPage({ params }: { params: { id: string } }) 
           <h2 className="text-xl font-semibold mb-2">Description</h2>
           <p className="whitespace-pre-wrap">{event.description}</p>
         </div>
+      </div>
+
+      <div className="flex">
+        <EditButton eventId={params.id} />
+        <DeleteButton 
+          action={async () => {
+            'use server';
+            await deleteEvent(params.id);
+          }} 
+        />
       </div>
     </div>
   );
