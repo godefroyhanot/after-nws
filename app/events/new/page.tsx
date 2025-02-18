@@ -1,31 +1,31 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-toastify';
-import party from 'party-js';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
+import party from "party-js";
+import { useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function NewEventPage() {
   const router = useRouter();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: '',
+    title: "",
+    description: "",
+    date: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/events', {
-        method: 'POST',
+      const response = await fetch("/api/events", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -36,17 +36,17 @@ export default function NewEventPage() {
             count: party.variation.range(30, 40),
           });
         }
-        toast.success('Événement créé avec succès !');
+        toast.success("Événement créé avec succès !");
         setTimeout(() => {
-          router.push('/events');
+          router.push("/events");
           router.refresh();
         }, 1000);
       } else {
-        throw new Error('Erreur lors de la création de l\'événement');
+        throw new Error("Erreur lors de la création de l'événement");
       }
     } catch (error) {
-      console.error('Erreur:', error);
-      toast.error('Une erreur est survenue lors de la création de l\'événement');
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue lors de la création de l'événement");
     }
   };
 
@@ -63,7 +63,9 @@ export default function NewEventPage() {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
               />
             </div>
@@ -73,7 +75,9 @@ export default function NewEventPage() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 className="h-32"
                 required
               />
@@ -85,23 +89,21 @@ export default function NewEventPage() {
                 type="datetime-local"
                 id="date"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, date: e.target.value })
+                }
                 required
               />
             </div>
 
-            <Button
-              ref={buttonRef}
-              type="submit"
-              className="w-full"
-            >
-              Créer l'événement
+            <Button ref={buttonRef} type="submit" className="w-full">
+              Créer l&apos;événement
             </Button>
             <Button
               type="button"
               variant="outline"
               className="w-full mt-2"
-              onClick={() => window.location.href = '/events'}
+              onClick={() => (window.location.href = "/events")}
             >
               Retour à la liste
             </Button>
@@ -110,4 +112,4 @@ export default function NewEventPage() {
       </Card>
     </div>
   );
-} 
+}
