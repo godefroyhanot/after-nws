@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint"
   },
-  "dependencies": {
+"dependencies": {
+    "jsonwebtoken": "^9.0.2",
     "@prisma/client": "^6.3.1",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.2",
@@ -20,7 +21,7 @@
     "clsx": "^2.1.1",
     "jose": "^5.10.0",
     "lucide-react": "^0.475.0",
-    "next": "^15.1.7",
+    "next": "^16.0.3",
     "next-auth": "^4.24.11",
     "party-js": "^2.2.0",
     "react": "^19.0.0",
